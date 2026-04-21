@@ -39,14 +39,13 @@ class User extends Authenticatable implements JWTSubject
                 'name'=>$request->name,
                 'email'=>$request->email,
                 'password'=>$request->password]);
-
+            auth()->attempt(['email'=> $request->email, 'password' => $request->password]);
             $accessToken = JWTAuth::fromUser($user);
             $this->saveToken($user, $accessToken);
             return $accessToken;
-        }catch(Throwable $e){
+        }catch(\Exception $e){
             Log::error("Error while registering the user at DB and saving the token".$e);
-            throw new Exception("Facing internal issue");
-            
+            throw new \Exception("Facing internal issue");
         }
     }
 
@@ -62,9 +61,9 @@ class User extends Authenticatable implements JWTSubject
             else{
                 return false;
             }
-        }catch(Throwable $e){
+        }catch(\Exception $e){
             Log::error("Error while verifying the user".$e);
-            throw new Exception("Facing internal issue");
+            throw new \Exception("Facing internal issue");
             
         }
     }
@@ -72,6 +71,11 @@ class User extends Authenticatable implements JWTSubject
     //Save the generated token against user entry in DB
     public function saveToken($user, $accessToken){
         $user->update(["token" => $accessToken]);
+    }
+
+    //fetch and return the logged user name
+    public function fetchUserName($id){
+        return User::where("id", $id)->get();
     }
 
     /**

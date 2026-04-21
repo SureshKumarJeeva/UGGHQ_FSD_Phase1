@@ -28,3 +28,4 @@ Thumbs.db
 composer.lock
 package-lock.json
 storage/logs/.gitignore
+Documents/Application Setup Notes.txt

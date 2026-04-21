@@ -123,4 +123,10 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    --the duration of time in minutes the cookie generated with the access token will live before 
+    -- it get expired
+    */
+    'cookie-ttl'=> env('TOKEN_COOKIE_TTL', 30),
+
 ];

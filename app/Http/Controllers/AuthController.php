@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use Throwable;
 
@@ -26,19 +27,23 @@ class AuthController extends Controller
                 return response()->json([
                     'status'=>'error',
                     'errors'=>$validator->errors()
-                    ], 401);
+                    ], 200);
             }
             //Verify login credentials and generate token on successful login
             if(!$accessToken = $this->user->verifyUserLogin($request))
-                return response()->json(['status'=>'error', 'message'=> "Invalid Login credentials"]);
+                return response()->json(['status'=>'error', 'message'=> "Invalid Login credentials"], 200);
             else{
-                $cookie = cookie('access_token', $accessToken, 15, '/', null, true, true, false, 'Lax');
+                $loggedUser = $this->user->fetchUserName(auth()->id());
+                $loggedUserName = $loggedUser[0]->name;
+                $cookie = cookie('access_token', $accessToken, config('app.cookie-ttl'), '/', null, true, true, false, 'Lax');
                 return response()->json([
-                        'status'=>'success'
+                        'status'=>'success',
+                        'data'=>$loggedUserName,
                         ], 200)->withCookie($cookie);
             }
-        }catch(Throwable $e){
-
+        }catch(\Exception $e){
+            Log::info($e);
+            throw new \Exception("Internal issue");
         }
     }
 
@@ -47,5 +52,17 @@ class AuthController extends Controller
         return response()->json([
             'status'=>'success'
         ], 200);
+    }
+
+    //Logout user session
+    public function logout(Request $request){
+        try{
+            auth()->logout();
+            return response()->json([
+                'status'=>'success'
+            ], 200);
+        }catch(\Exception $e){
+            Log::info($e);
+        }
     }
 }

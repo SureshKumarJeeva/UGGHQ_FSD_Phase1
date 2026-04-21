@@ -16,9 +16,13 @@ class EnsureTokenIsRedirected
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if($request->hasCookie('access_token')){
-            $request->headers->set('Authorization', 'Bearer '.$request->cookie("access_token"));
+        try{
+            if($request->hasCookie('access_token')){
+                $request->headers->set('Authorization', 'Bearer '.$request->cookie("access_token"));
+            }
+            return $next($request);
+        }catch(\Exception $e){
+            Log::error($e);
         }
-        return $next($request);
     }
-}
+}   
